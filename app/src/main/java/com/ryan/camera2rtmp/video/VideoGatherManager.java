@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class VideoGatherManager implements CameraNV21DataListener {
 
-    private static final boolean SAVE_FILE_FOR_TEST = true;
+    private static final boolean SAVE_FILE_FOR_TEST = false;
     private FileManager fileManager;
 
     private CameraSurfaceView mCameraSurfaceView;

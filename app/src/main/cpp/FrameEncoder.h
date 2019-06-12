@@ -5,9 +5,14 @@
 #ifndef CAMERARTMP_FRAMEENCODER_H
 #define CAMERARTMP_FRAMEENCODER_H
 
+#include <string.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
 extern "C" {
-#include <libavutil/pixfmt.h>
-#include <libavcodec/avcodec.h>
 #include <x264.h>
 }
 

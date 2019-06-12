@@ -1,1 +1,1 @@
-### Camera + ffmpeg & mediacode + librtmp 实现音视频推流
+### Camera ==> NV21 ==> yuv420p ==> libyuv ==> x264 ==> h264 ==> UDP socket ==> 实现视频监控

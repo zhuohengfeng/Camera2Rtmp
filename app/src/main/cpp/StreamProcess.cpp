@@ -6,11 +6,6 @@
 #include "libyuv.h"
 #include "FrameEncoder.h"
 
-extern "C"
-{
-#include "libavformat/avformat.h"
-}
-
 FrameEncoder* frameEncoder;
 
 void nv21ToYuv420p(jbyte* src_nv21_data, jint width, jint height, jbyte* des_yuv420p_data){

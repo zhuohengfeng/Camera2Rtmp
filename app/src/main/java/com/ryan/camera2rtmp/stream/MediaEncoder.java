@@ -4,15 +4,26 @@ import com.ryan.camera2rtmp.Contacts;
 import com.ryan.camera2rtmp.utils.FileManager;
 import com.ryan.camera2rtmp.video.VideoData;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class MediaEncoder {
 
-    private static final boolean SAVE_FILE_FOR_TEST = true;
+
+    private static final String VLC_HOST = "10.88.1.102";
+    private static final int VLC_PORT = 5001;
+
+    private static final boolean SAVE_FILE_FOR_TEST = false;
 
 
     private Thread videoEncoderThread, audioEncoderThread;
     private boolean videoEncoderLoop, audioEncoderLoop;
+
+    private InetAddress address;
+    private DatagramSocket socket;
 
     //视频流队列
     private LinkedBlockingQueue<VideoData> videoQueue;
@@ -29,6 +40,13 @@ public class MediaEncoder {
         //这里我们初始化音频数据，为什么要初始化音频数据呢？音频数据里面我们做了什么事情？
 //        audioEncodeBuffer = StreamProcessManager.encoderAudioInit(Contacts.SAMPLE_RATE,
 //                Contacts.CHANNELS, Contacts.BIT_RATE);
+
+        try {
+            address = InetAddress.getByName(VLC_HOST);
+            socket = new DatagramSocket();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -58,6 +76,9 @@ public class MediaEncoder {
             throw new RuntimeException("必须先停止");
         }
 
+        /**
+         * ffplay -f h264 test.h264
+         */
         videoEncoderThread = new Thread() {
             @Override
             public void run() {
@@ -91,6 +112,15 @@ public class MediaEncoder {
                             //我们可以把数据在java层保存到文件中，看看我们编码的h264数据是否能播放，h264裸数据可以在VLC播放器中播放
                             if (SAVE_FILE_FOR_TEST) {
                                 videoFileManager.saveFileData(encodeData);
+                            }
+
+
+                            try {
+                                // 把数据通过UDP发送出去
+                                DatagramPacket packet = new DatagramPacket(encodeData, 0, encodeData.length, address, VLC_PORT);
+                                socket.send(packet);
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
                         }
                     } catch (InterruptedException e) {
