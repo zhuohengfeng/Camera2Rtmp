@@ -68,6 +68,53 @@ void scaleYuv420p(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420
                       (libyuv::FilterMode) mode);
 }
 
+void rotateI420(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420_data, jint degree) {
+    jint src_i420_y_size = width * height;
+    jint src_i420_u_size = (width >> 1) * (height >> 1);
+
+    jbyte *src_i420_y_data = src_i420_data;
+    jbyte *src_i420_u_data = src_i420_data + src_i420_y_size;
+    jbyte *src_i420_v_data = src_i420_data + src_i420_y_size + src_i420_u_size;
+
+    jbyte *dst_i420_y_data = dst_i420_data;
+    jbyte *dst_i420_u_data = dst_i420_data + src_i420_y_size;
+    jbyte *dst_i420_v_data = dst_i420_data + src_i420_y_size + src_i420_u_size;
+
+    //要注意这里的width和height在旋转之后是相反的
+    if (degree == libyuv::kRotate90 || degree == libyuv::kRotate270) {
+        libyuv::I420Rotate((const uint8 *) src_i420_y_data, width,
+                           (const uint8 *) src_i420_u_data, width >> 1,
+                           (const uint8 *) src_i420_v_data, width >> 1,
+                           (uint8 *) dst_i420_y_data, height,
+                           (uint8 *) dst_i420_u_data, height >> 1,
+                           (uint8 *) dst_i420_v_data, height >> 1,
+                           width, height,
+                           (libyuv::RotationMode) degree);
+    }
+}
+
+void mirrorI420(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420_data) {
+    jint src_i420_y_size = width * height;
+    jint src_i420_u_size = (width >> 1) * (height >> 1);
+
+    jbyte *src_i420_y_data = src_i420_data;
+    jbyte *src_i420_u_data = src_i420_data + src_i420_y_size;
+    jbyte *src_i420_v_data = src_i420_data + src_i420_y_size + src_i420_u_size;
+
+    jbyte *dst_i420_y_data = dst_i420_data;
+    jbyte *dst_i420_u_data = dst_i420_data + src_i420_y_size;
+    jbyte *dst_i420_v_data = dst_i420_data + src_i420_y_size + src_i420_u_size;
+
+    libyuv::I420Mirror((const uint8 *) src_i420_y_data, width,
+                       (const uint8 *) src_i420_u_data, width >> 1,
+                       (const uint8 *) src_i420_v_data, width >> 1,
+                       (uint8 *) dst_i420_y_data, width,
+                       (uint8 *) dst_i420_u_data, width >> 1,
+                       (uint8 *) dst_i420_v_data, width >> 1,
+                       width, height);
+}
+
+
 
 /** -------------------------------------- */
 /**
@@ -82,14 +129,20 @@ Java_com_ryan_camera2rtmp_stream_StreamProcessManager_compressYUV(JNIEnv *env, j
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jbyte *dst = env->GetByteArrayElements(dst_, NULL);
 
-    jbyte *temp_i420_data = (jbyte *) malloc(sizeof(jbyte) * width * height * 3 / 2);
+    jbyte *temp_i420_data_scale = (jbyte *) malloc(sizeof(jbyte) * width * height * 3 / 2);
+    jbyte *temp_i420_data_rotate = (jbyte *) malloc(sizeof(jbyte) * width * height * 3 / 2);
 
     //LOGD("compressYUV width=%d, height=%d, dst_width=%d, dst_height=%d", width, height, dst_width, dst_height);
     // 调用接口，转化成相同大小的YUV420P格式数据
-    nv21ToYuv420p(src, width, height, temp_i420_data);
+    nv21ToYuv420p(src, width, height, temp_i420_data_scale);
 
     // 进行缩放操作，对YUV420P数据进行压缩
-    scaleYuv420p(temp_i420_data, width, height, dst, dst_width, dst_height, 0);
+    scaleYuv420p(temp_i420_data_scale, width, height, temp_i420_data_rotate, dst_width, dst_height, 0);
+
+    rotateI420(temp_i420_data_rotate, dst_width, dst_height, dst, 90); // 这里要对后置摄像头进行一下翻转
+
+    free(temp_i420_data_scale);
+    free(temp_i420_data_rotate);
 
     env->ReleaseByteArrayElements(src_, src, 0);
     env->ReleaseByteArrayElements(dst_, dst, 0);

@@ -68,6 +68,11 @@ set_target_properties( libyuv
         PROPERTIES IMPORTED_LOCATION
         ${CMAKE_SOURCE_DIR}/jniLibs/${ANDROID_ABI}/libyuv.a)
 
+add_library( libx264 STATIC IMPORTED)
+set_target_properties( libx264
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/jniLibs/${ANDROID_ABI}/libx264.a)
+
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
 # default, you only need to specify the name of the public NDK library
@@ -89,6 +94,7 @@ target_link_libraries( # Specifies the target library.
         stream
 
         libyuv
+        libx264
 
         avcodec-57
         avdevice-57

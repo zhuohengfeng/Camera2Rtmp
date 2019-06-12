@@ -8,7 +8,7 @@ public class FileManager {
     public static final String TEST_PCM_FILE = "/sdcard/123.pcm";
     public static final String TEST_WAV_FILE = "/sdcard/123.wav";
     public static final String TEST_YUV_FILE = "/sdcard/test.yuv";
-    public static final String TEST_H264_FILE = "/sdcard/123.h264";
+    public static final String TEST_H264_FILE = "/sdcard/test.h264";
     public static final String TEST_AAC_FILE = "/sdcard/123.aac";
     private String fileName;
     private FileOutputStream fileOutputStream;
